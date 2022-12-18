@@ -211,7 +211,7 @@ const start = async (ws: WebSocket) => {
     data.world.generate(scene, blockTexture);
 
     const entityImage = await imageLoader.loadAsync("res/entities.png");
-    const entityTexture = loadTexArray(entityImage, 4, 16);
+    const entityTexture = loadTexArray(entityImage, 8, 8);
     data.drawData.entityRenderer.createMesh(scene, entityTexture);
 
     window.requestAnimationFrame(() => { update(data) });

@@ -1,6 +1,7 @@
 import { Blocks } from "../../Common/src/blocks";
 import { World } from "./world";
-import { MessageType, sendMsg } from "./net";
+import { sendMsg } from "./net";
+import { MessageType } from "../../Common/src/net";
 import { User } from "./user";
 
 export class Chunk {

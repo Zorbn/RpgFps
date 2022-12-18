@@ -89,11 +89,13 @@ export class EntityRenderer {
     }
 
     addModel = (model: EntityModel, instanceIndex: number, camX: number, camZ: number) => {
-        if (this.mesh == undefined) return;
-        if (!model.visible) return;
+        if (this.mesh == undefined) return false;
+        if (!model.visible) return false;
 
         this.sprites[instanceIndex] = model.sprite;
         this.mesh.setMatrixAt(instanceIndex, this.createMatrix(camX, camZ, model.getX(), model.getY(), model.getZ()));
+
+        return true;
     }
 
     update = (camX: number, camZ: number, enemies: Map<number, Enemy>, players: Map<number, Player>) => {
@@ -102,11 +104,15 @@ export class EntityRenderer {
         let instanceCount = 0;
 
         for (let [_id, enemy] of enemies) {
-            this.addModel(enemy.model, instanceCount++, camX, camZ);
+            if (this.addModel(enemy.model, instanceCount, camX, camZ)) {
+                instanceCount++;
+            }
         }
 
         for (let [_id, player] of players) {
-            this.addModel(player.model, instanceCount++, camX, camZ);
+            if (this.addModel(player.model, instanceCount, camX, camZ)) {
+                instanceCount++;
+            }
         }
 
         this.mesh.instanceMatrix.needsUpdate = true;

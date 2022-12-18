@@ -48,7 +48,6 @@ export class Enemy {
             this.wanderTimer = wanderDelay;
 
             this.targetX = this.x + this.getWanderPos();
-            this.targetY = this.y + this.getWanderPos();
             this.targetZ = this.z + this.getWanderPos();
         }
     }
