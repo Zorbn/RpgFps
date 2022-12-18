@@ -4,10 +4,10 @@ import { blockAttributes, Blocks } from "../../Common/src/blocks";
 import { User } from "./user";
 
 export class World {
-    public mapSizeInChunks: number;
-    public mapHeightInChunks: number;
-    public mapSize: number;
-    public mapHeight: number;
+    public readonly mapSizeInChunks: number;
+    public readonly mapHeightInChunks: number;
+    public readonly mapSize: number;
+    public readonly mapHeight: number;
     private chunkSize: number;
     private chunkHeight: number;
     private chunks: Map<number, Chunk>;
@@ -87,10 +87,12 @@ export class World {
             this.getBlock(x, y, z - 1) != Blocks.Air;
     }
 
-    getSpawnPos = (spawnChunkX: number, spawnChunkY: number, spawnChunkZ: number, force: boolean) => {
+    getSpawnPos = (spawnChunkX: number, spawnChunkY: number, spawnChunkZ: number, size: number, force: boolean) => {
         const spawnChunkWorldX = spawnChunkX * this.chunkSize;
         const spawnChunkWorldY = spawnChunkY * this.chunkHeight;
         const spawnChunkWorldZ = spawnChunkZ * this.chunkSize;
+
+        const halfSize = size * 0.5;
 
         const spawnChunk = this.getChunk(spawnChunkX, spawnChunkY, spawnChunkZ);
 
@@ -101,9 +103,9 @@ export class World {
 
             return {
                 succeeded: true,
-                x: spawnChunkWorldX + x + 0.5,
-                y: spawnChunkWorldY + y + 0.5,
-                z: spawnChunkWorldZ + z + 0.5,
+                x: spawnChunkWorldX + x + halfSize,
+                y: spawnChunkWorldY + y + halfSize,
+                z: spawnChunkWorldZ + z + halfSize,
             }
         }
 
@@ -115,9 +117,9 @@ export class World {
 
             return {
                 succeeded: true,
-                x: spawnChunkWorldX + x + 0.5,
-                y: spawnChunkWorldY + y + 0.5,
-                z: spawnChunkWorldZ + z + 0.5,
+                x: spawnChunkWorldX + x + halfSize,
+                y: spawnChunkWorldY + y + halfSize,
+                z: spawnChunkWorldZ + z + halfSize,
             }
         }
 
@@ -131,7 +133,7 @@ export class World {
 
     update = (world: World, users: Map<number, User>, force: boolean) => {
         for (let [_hash, chunk] of this.chunks) {
-            chunk.update(world, users, force);
+            chunk.update(users, force);
         }
     }
 

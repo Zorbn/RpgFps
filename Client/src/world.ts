@@ -4,10 +4,10 @@ import { hashVector } from "../../Common/src/gameMath";
 import { blockAttributes, Blocks } from "../../Common/src/blocks";
 
 export class World {
-    public mapSizeInChunks: number;
-    public mapHeightInChunks: number;
-    public mapSize: number;
-    public mapHeight: number;
+    public readonly mapSizeInChunks: number;
+    public readonly mapHeightInChunks: number;
+    public readonly mapSize: number;
+    public readonly mapHeight: number;
     private chunkSize: number;
     private chunkHeight: number;
     private chunks: Map<number, Chunk>;

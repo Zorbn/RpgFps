@@ -2,23 +2,28 @@ import * as Three from "three";
 
 const playerSpeed = 3;
 const playerModelInterpSpeed = 10;
+const maxLookAngle = Math.PI * 0.5 * 0.99;
 
 export class Player {
+    public readonly size: number;
     private x: number;
     private y: number;
     private z: number;
+    private eyeOffset: number;
     private angle: Three.Euler;
     private forwardDir: Three.Vector2;
     private rightDir: Three.Vector2;
     private lookDir: Three.Vector3;
     private model: Three.Mesh;
 
-    constructor(scene: Three.Scene, x: number, y: number, z: number) {
+    constructor(scene: Three.Scene, x: number, y: number, z: number, size: number) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.size = size;
+        this.eyeOffset = size * 0.25;
 
-        const geometry = new Three.BoxGeometry(0.5, 0.5, 0.5);
+        const geometry = new Three.BoxGeometry(size, size, size);
         const material = new Three.MeshBasicMaterial({
             color: 0x00ff00,
         });
@@ -47,6 +52,7 @@ export class Player {
     rotate = (camera: Three.Camera, deltaX: number, deltaY: number) => {
         this.angle.x += deltaX;
         this.angle.y += deltaY;
+        this.angle.x = Math.max(Math.min(this.angle.x, maxLookAngle), -maxLookAngle);
 
         this.forwardDir.x = Math.sin(this.angle.y);
         this.forwardDir.y = Math.cos(this.angle.y);
@@ -69,7 +75,7 @@ export class Player {
 
     moveCamera = (camera: Three.Camera) => {
         camera.position.x = this.x;
-        camera.position.y = this.y;
+        camera.position.y = this.y + this.eyeOffset;
         camera.position.z = this.z;
     }
 

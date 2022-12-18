@@ -42,7 +42,7 @@ export class Chunk {
         return this.data[this.getBlockIndex(x, y, z)];
     }
 
-    update = (world: World, users: Map<number, User>, force: boolean) => {
+    update = (users: Map<number, User>, force: boolean) => {
         if (force || this.needsUpdate) {
             for (let [_id, user] of users) {
                 sendMsg(user.socket, MessageType.UpdateChunk, {
@@ -61,7 +61,12 @@ export class Chunk {
         for (let z = 0; z < this.size; z++) {
             for (let y = 0; y < this.height; y++) {
                 for (let x = 0; x < this.size; x++) {
-                    if (Math.random() > 0.5) {
+                    if (y == 0) {
+                        this.setBlock(x, y, z, Blocks.Grass);
+                        continue;
+                    }
+
+                    if (y == 1 && Math.random() > 0.8) {
                         this.setBlock(x, y, z, Blocks.Tree);
                         continue;
                     }

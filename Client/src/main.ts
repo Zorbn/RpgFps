@@ -90,7 +90,7 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
     const msg = JSON.parse(event.data);
 
     if (msg.type == MessageType.SpawnPlayer) {
-        data.players.set(msg.data.id, new Player(data.drawData.scene, msg.data.x, msg.data.y, msg.data.z))
+        data.players.set(msg.data.id, new Player(data.drawData.scene, msg.data.x, msg.data.y, msg.data.z, msg.data.size))
     } else if (msg.type == MessageType.MovePlayer) {
         if (!data.players.has(msg.data.id)) return;
         if (msg.data.id == data.localId) return;
@@ -161,7 +161,7 @@ const start = async (ws: WebSocket) => {
 
         let player = data.players.get(data.localId)!;
         player.rotate(camera, -event.movementY * mouseSensitivity, -event.movementX * mouseSensitivity);
-    }, false);
+    }, true);
 
     ws.onmessage = (event) => {
         data.messageEvents.push(event);
@@ -175,7 +175,7 @@ const start = async (ws: WebSocket) => {
 
     const imageLoader = new Three.ImageLoader();
     const blockImage = await imageLoader.loadAsync("res/blocks.png");
-    const blockTexture = loadTexArray(blockImage, 64, 16);
+    const blockTexture = loadTexArray(blockImage, 16, 32);
     data.world.generate(scene, blockTexture);
 
     window.requestAnimationFrame(() => { update(data) });

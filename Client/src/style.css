@@ -1,11 +1,12 @@
 body {
     margin: 0;
     overflow: hidden;
+    background-color: black;
     --color-bg: #272822;
     --color-blue: #66d9ef;
     --color-green: #a6e22e;
     --color-white: #ffffff;
-    --color-t-white: #ffffff66;
+    --color-t-white: #ffffff33;
     --color-transparent: #00000000;
 }
 

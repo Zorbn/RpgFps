@@ -6,16 +6,24 @@ import { User } from "./user";
 const port = 8080;
 const wss = new WebSocketServer({ port });
 const updateRate = 0.016;
+const playerSize = 0.25;
 
 let connectedUsers = new Map<number, User>();
 let nextWsId = 0;
 let world = new World(32, 8, 2, 1);
+world.generate();
 
 wss.on("connection", (ws) => {
+    let spawnX = Math.floor(Math.random() * world.mapSizeInChunks);
+    let spawnY = 0;
+    let spawnZ = Math.floor(Math.random() * world.mapSizeInChunks);
+
+    let spawnPos = world.getSpawnPos(spawnX, spawnY, spawnZ, playerSize, true);
+
     let player = {
-        x: Math.random() * 5,
-        y: 0.25,
-        z: 0,
+        x: spawnPos.x,
+        y: spawnPos.y,
+        z: spawnPos.z,
     };
 
     let id = nextWsId++;
@@ -31,6 +39,7 @@ wss.on("connection", (ws) => {
             x: user.player.x,
             y: user.player.y,
             z: user.player.z,
+            size: playerSize,
         });
     }
 
@@ -47,6 +56,7 @@ wss.on("connection", (ws) => {
             x: player.x,
             y: player.y,
             z: player.z,
+            size: playerSize,
         });
     }
 
@@ -95,7 +105,5 @@ const update = () => {
 
     world.update(world, connectedUsers, false);
 };
-
-world.generate();
 
 setInterval(update, updateRate * 1000);
