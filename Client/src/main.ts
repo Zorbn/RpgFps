@@ -1,11 +1,12 @@
+import './style.css';
 import * as Three from "three";
 import { Enemy } from "./enemy";
 import { EntityRenderer } from "./entityRenderer";
 import { Input } from "./input";
 import { Player } from "./player";
 import { loadTexArray } from "./resources";
-import './style.css';
 import { World } from "./world";
+import { MessageType } from "../../Common/src/net";
 
 const mainMenuElement = document.getElementById("main-menu")!;
 const playButton = document.getElementById("play")!;
@@ -13,15 +14,6 @@ const ipInput = document.getElementById("ip")! as HTMLInputElement;
 const port = 8080;
 const mouseSensitivity = 0.002;
 const maxEntities = 64;
-
-enum MessageType {
-    SpawnPlayer,
-    MovePlayer,
-    InitClient,
-    UpdateChunk,
-    SpawnEnemy,
-    MoveEnemy,
-};
 
 const sendMsg = (socket: WebSocket, type: MessageType, data: object) => {
     socket.send(JSON.stringify({
@@ -106,6 +98,10 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             if (msg.data.id == data.localId) return;
             let player = data.players.get(msg.data.id)!;
             player.setPos(msg.data.x, msg.data.y, msg.data.z);
+            break;
+
+        case MessageType.DestroyPlayer:
+            data.players.delete(msg.data.id);
             break;
 
         case MessageType.InitClient:

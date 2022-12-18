@@ -1,13 +1,9 @@
 import { WebSocketServer } from "ws";
-import { MessageType, sendMsg } from "./net";
+import { sendMsg } from "./net";
+import { MessageType } from "../../Common/src/net";
 import { World } from "./world";
 import { User } from "./user";
 import { Enemy } from "./enemy";
-
-/*
- * TODO:
- * Delete players that leave.
- */
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
@@ -113,6 +109,13 @@ wss.on("connection", (ws) => {
 
     ws.on("close", () => {
         connectedUsers.delete(id);
+
+        // Tell other players to destroy this one.
+        for (let [_otherId, user] of connectedUsers) {
+            sendMsg(user.socket, MessageType.DestroyPlayer, {
+                id,
+            });
+        }
     });
 
     const handleMessage = (msg: any) => {
