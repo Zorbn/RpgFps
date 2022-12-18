@@ -175,7 +175,7 @@ const start = async (ws: WebSocket) => {
 
     const imageLoader = new Three.ImageLoader();
     const blockImage = await imageLoader.loadAsync("res/blocks.png");
-    const blockTexture = loadTexArray(blockImage, 16, 32);
+    const blockTexture = loadTexArray(blockImage, 16, 16);
     data.world.generate(scene, blockTexture);
 
     window.requestAnimationFrame(() => { update(data) });
