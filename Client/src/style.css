@@ -1,0 +1,34 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    --color-bg: #272822;
+    --color-blue: #66d9ef;
+    --color-green: #a6e22e;
+    --color-white: #ffffff;
+    --color-t-white: #ffffff66;
+    --color-transparent: #00000000;
+}
+
+#main-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-image: linear-gradient(var(--color-transparent) 0%, var(--color-transparent) 48%,
+                                      var(--color-t-white) 52%, var(--color-t-white) 100%),
+                      radial-gradient(circle at 0% 0%, var(--color-blue), var(--color-transparent)),
+                      radial-gradient(circle at 100% 100%, var(--color-green), var(--color-transparent));
+}
+
+#center-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.menu-option {
+    flex: 100%;
+    margin-top: 0.25rem;
+    padding: 0.5rem;
+}
