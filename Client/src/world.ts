@@ -68,7 +68,7 @@ export class World {
         let localY = y % this.chunkHeight;
         let localZ = z % this.chunkSize;
         let chunk = this.getChunk(chunkX, chunkY, chunkZ);
-        if (chunk == null) return Blocks.Air;
+        if (chunk == null) return Blocks.Grass;
         return chunk.getBlock(localX, localY, localZ);
     }
 

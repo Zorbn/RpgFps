@@ -5,6 +5,8 @@ export enum MessageType {
     MovePlayer,
     InitClient,
     UpdateChunk,
+    SpawnEnemy,
+    MoveEnemy,
 };
 
 export const sendMsg = (socket: WebSocket, type: MessageType, data: object) => {

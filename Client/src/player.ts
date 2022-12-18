@@ -1,11 +1,12 @@
 import * as Three from "three";
+import { EntityModel } from "./entityModel";
 
 const playerSpeed = 3;
-const playerModelInterpSpeed = 10;
 const maxLookAngle = Math.PI * 0.5 * 0.99;
 
 export class Player {
     public readonly size: number;
+    public readonly model: EntityModel;
     private x: number;
     private y: number;
     private z: number;
@@ -14,40 +15,20 @@ export class Player {
     private forwardDir: Three.Vector2;
     private rightDir: Three.Vector2;
     private lookDir: Three.Vector3;
-    private model: Three.Mesh;
 
-    constructor(scene: Three.Scene, x: number, y: number, z: number, size: number) {
+    constructor(x: number, y: number, z: number, size: number) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.size = size;
         this.eyeOffset = size * 0.25;
-
-        const geometry = new Three.BoxGeometry(size, size, size);
-        const material = new Three.MeshBasicMaterial({
-            color: 0x00ff00,
-        });
-
-        this.model = new Three.Mesh(geometry, material);
-        this.model.position.x = x;
-        this.model.position.y = y;
-        this.model.position.z = z;
-
-        scene.add(this.model);
+        this.model = new EntityModel(x, y, z, 0);
 
         this.angle = new Three.Euler(0, 0, 0, "YXZ");
         this.forwardDir = new Three.Vector2();
         this.rightDir = new Three.Vector2();
         this.lookDir = new Three.Vector3();
     }
-
-    delete = (scene: Three.Scene) => {
-        scene.remove(this.model);
-
-        this.model.geometry.dispose();
-        let material = this.model.material as Three.Material;
-        material.dispose();
-    };
 
     rotate = (camera: Three.Camera, deltaX: number, deltaY: number) => {
         this.angle.x += deltaX;
@@ -66,6 +47,10 @@ export class Player {
         camera.getWorldDirection(this.lookDir);
     };
 
+    update = (deltaTime: number) => {
+        this.model.interpolate(this.x, this.y, this.z, deltaTime);
+    }
+
     move = (moveX: number, moveZ: number, deltaTime: number) => {
         const currentSpeed = playerSpeed * deltaTime;
 
@@ -79,20 +64,10 @@ export class Player {
         camera.position.z = this.z;
     }
 
-    interpolateModel = (deltaTime: number) => {
-        this.model.position.x += deltaTime * playerModelInterpSpeed * (this.x - this.model.position.x);
-        this.model.position.y += deltaTime * playerModelInterpSpeed * (this.y - this.model.position.y);
-        this.model.position.z += deltaTime * playerModelInterpSpeed * (this.z - this.model.position.z);
-    }
-
     setPos = (x: number, y: number, z: number) => {
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-    setVisible = (visible: boolean) => {
-        this.model.visible = visible;
     }
 
     getX = () => {
