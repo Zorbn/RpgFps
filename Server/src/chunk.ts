@@ -6,6 +6,9 @@ import { User } from "./user";
 
 export class Chunk {
     public needsUpdate: boolean;
+    public storedEnemyIds: Set<number>;
+    public storedProjectileIds: Set<number>;
+    public storedPlayerIds: Set<number>;
     private chunkX: number;
     private chunkY: number;
     private chunkZ: number;
@@ -20,6 +23,9 @@ export class Chunk {
         this.size = size;
         this.height = height;
         this.data = new Array(size * height * size);
+        this.storedEnemyIds = new Set<number>();
+        this.storedProjectileIds = new Set<number>();
+        this.storedPlayerIds = new Set<number>();
 
         this.needsUpdate = true;
     }
@@ -56,6 +62,12 @@ export class Chunk {
 
             this.needsUpdate = false;
         }
+    }
+
+    clearStored = () => {
+        this.storedEnemyIds.clear();
+        this.storedPlayerIds.clear();
+        this.storedProjectileIds.clear();
     }
 
     generate = (_mapSize: number) => {

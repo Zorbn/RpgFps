@@ -2,14 +2,15 @@ import { Chunk } from "./chunk";
 import { hashVector } from "../../Common/src/gameMath";
 import { blockAttributes, Blocks } from "../../Common/src/blocks";
 import { User } from "./user";
+import { EntityTypes } from "../../Common/src/entityTypes";
 
 export class World {
     public readonly mapSizeInChunks: number;
     public readonly mapHeightInChunks: number;
     public readonly mapSize: number;
     public readonly mapHeight: number;
-    private chunkSize: number;
-    private chunkHeight: number;
+    public readonly chunkSize: number;
+    public readonly chunkHeight: number;
     private chunks: Map<number, Chunk>;
 
     constructor(chunkSize: number, chunkHeight: number, mapSizeInChunks: number, mapHeightInChunks: number) {
@@ -24,7 +25,7 @@ export class World {
 
     getChunk = (x: number, y: number, z: number) => {
         let hash = hashVector(x, y, z);
-        return this.chunks.get(hash)!;
+        return this.chunks.get(hash);
     }
 
     setChunk = (x: number, y: number, z: number, chunk: Chunk) => {
@@ -94,7 +95,7 @@ export class World {
 
         const halfSize = size * 0.5;
 
-        const spawnChunk = this.getChunk(spawnChunkX, spawnChunkY, spawnChunkZ);
+        const spawnChunk = this.getChunk(spawnChunkX, spawnChunkY, spawnChunkZ)!;
 
         for (let z = 0; z < this.chunkSize; z++)
         for (let y = 0; y < this.chunkHeight; y++)
@@ -131,9 +132,38 @@ export class World {
         }
     }
 
-    update = (world: World, users: Map<number, User>, force: boolean) => {
+    update = (users: Map<number, User>, force: boolean) => {
         for (let [_hash, chunk] of this.chunks) {
             chunk.update(users, force);
+        }
+    }
+
+    clearStored = () => {
+        for (let [_hash, chunk] of this.chunks) {
+            chunk.clearStored();
+        }
+    }
+
+    tryStore = (id: number, x: number, y: number, z: number, type: EntityTypes) => {
+        const chunkX = Math.floor(x / this.chunkSize);
+        const chunkY = Math.floor(y / this.chunkHeight);
+        const chunkZ = Math.floor(z / this.chunkSize);
+
+        const chunk = this.getChunk(chunkX, chunkY, chunkZ);
+        if (chunk == undefined) return;
+
+        switch (type) {
+            case EntityTypes.Player:
+                chunk.storedPlayerIds.add(id);
+                break;
+
+            case EntityTypes.Enemy:
+                chunk.storedEnemyIds.add(id);
+                break;
+
+            case EntityTypes.Projectile:
+                chunk.storedProjectileIds.add(id);
+                break;
         }
     }
 

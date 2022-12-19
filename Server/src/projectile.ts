@@ -2,6 +2,8 @@ import { distance } from "../../Common/src/gameMath";
 import { ProjectileTypes, projectileAttributes } from "../../Common/src/projectiles";
 
 export class Projectile {
+    public readonly type: ProjectileTypes;
+
     private x: number;
     private y: number;
     private z: number;
@@ -30,6 +32,7 @@ export class Projectile {
         this.dirY = dirY;
         this.dirZ = dirZ;
 
+        this.type = type;
         this.speed = projectileAttributes.get(type)!.speed;
         this.range = projectileAttributes.get(type)!.range;
     }

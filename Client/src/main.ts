@@ -114,9 +114,15 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             break;
 
         case MessageType.MoveEnemy:
-            if (!data.enemies.has(msg.data.id)) return;
-            let enemy = data.enemies.get(msg.data.id)!;
-            enemy.setPos(msg.data.x, msg.data.y, msg.data.z);
+            for (let eu of msg.data.enemyUpdates) {
+                if (!data.enemies.has(eu.id)) return;
+                let enemy = data.enemies.get(eu.id)!;
+                enemy.setPos(eu.x, eu.y, eu.z);
+            }
+            break;
+
+        case MessageType.DestroyEnemy:
+            data.enemies.delete(msg.data.id);
             break;
 
         case MessageType.SpawnProjectile:

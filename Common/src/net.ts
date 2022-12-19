@@ -6,5 +6,6 @@ export enum MessageType {
     UpdateChunk,
     SpawnEnemy,
     MoveEnemy,
+    DestroyEnemy,
     SpawnProjectile,
 };

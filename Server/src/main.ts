@@ -6,6 +6,7 @@ import { User } from "./user";
 import { Enemy } from "./enemy";
 import { Projectile } from "./projectile";
 import { Projectiles } from "./projectiles";
+import { EntityTypes } from "../../Common/src/entityTypes";
 
 // TODO: Spawn existing projectiles for new players.
 
@@ -19,7 +20,7 @@ let nextWsId = 0;
 let world = new World(32, 8, 2, 1);
 world.generate();
 let nextEnemyId = 0;
-let enemies: Enemy[] = [];
+let enemies = new Map<number, Enemy>;
 let projectiles = new Projectiles();
 
 const spawnEnemy = () => {
@@ -31,13 +32,14 @@ const spawnEnemy = () => {
 
     if (!spawnPos.succeeded) return;
 
-    const newEnemy = new Enemy(nextEnemyId++, spawnPos.x, spawnPos.y, spawnPos.z, 1, 5);
-    enemies.push(newEnemy);
+    const newEnemyId = nextEnemyId++;
+    const newEnemy = new Enemy(spawnPos.x, spawnPos.y, spawnPos.z, 1, 5);
+    enemies.set(newEnemyId, newEnemy);
 
     // Tell players about the new enemy.
     for (let [_id, user] of connectedUsers) {
         sendMsg(user.socket, MessageType.SpawnEnemy, {
-            id: newEnemy.id,
+            id: newEnemyId,
             x: newEnemy.getX(),
             y: newEnemy.getY(),
             z: newEnemy.getZ(),
@@ -45,7 +47,7 @@ const spawnEnemy = () => {
     }
 };
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 64; i++) {
     spawnEnemy();
 }
 
@@ -79,14 +81,14 @@ wss.on("connection", (ws) => {
     }
 
     // Tell new player about the map.
-    world.update(world, new Map<number, User>([
+    world.update(new Map<number, User>([
         [id, connectedUsers.get(id)!]
     ]), true);
 
     // Tell new player about all enemies on the map.
-    for (let enemy of enemies) {
+    for (let [id, enemy] of enemies) {
         sendMsg(ws, MessageType.SpawnEnemy, {
-            id: enemy.id,
+            id: id,
             x: enemy.getX(),
             y: enemy.getY(),
             z: enemy.getZ(),
@@ -135,6 +137,8 @@ wss.on("connection", (ws) => {
                 break;
 
             case MessageType.SpawnProjectile:
+                if (msg.data.dirX == 0 && msg.data.dirY == 0 && msg.data.dirZ == 0) return;
+
                 projectiles.spawnProjectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX,
                     msg.data.dirY, msg.data.dirZ, msg.data.type, connectedUsers);
                 break;
@@ -153,32 +157,53 @@ wss.on("connection", (ws) => {
 });
 
 const update = () => {
-    for (let enemy of enemies) {
+    // const start = performance.now();
+
+    world.clearStored();
+
+    for (let [id, enemy] of enemies) {
         enemy.update(projectiles, connectedUsers, updateRate);
+        world.tryStore(id, enemy.getX(), enemy.getY(), enemy.getZ(), EntityTypes.Enemy);
     }
 
     for (let [id, user] of connectedUsers) {
+        world.tryStore(id, user.player.x, user.player.y, user.player.z, EntityTypes.Player);
+
+        const userMoveData = {
+            id: id,
+            x: user.player.x,
+            y: user.player.y,
+            z: user.player.z,
+        };
+
         for (let [otherId, otherUser] of connectedUsers) {
             if (otherId == id) continue;
-            sendMsg(user.socket, MessageType.MovePlayer, {
-                id: otherId,
-                x: otherUser.player.x,
-                y: otherUser.player.y,
-                z: otherUser.player.z,
-            });
+            sendMsg(otherUser.socket, MessageType.MovePlayer, userMoveData);
         }
 
-        for (let enemy of enemies) {
-            sendMsg(user.socket, MessageType.MoveEnemy, {
-                id: enemy.id,
+        let enemyUpdates = [];
+
+        for (let [id, enemy] of enemies) {
+            enemyUpdates.push({
+                id,
                 x: enemy.getX(),
                 y: enemy.getY(),
                 z: enemy.getZ(),
-            });
+            })
         }
+
+        sendMsg(user.socket, MessageType.MoveEnemy, {
+            enemyUpdates,
+        });
     }
 
-    world.update(world, connectedUsers, false);
+    projectiles.update(updateRate);
+    projectiles.checkCollisions(world, connectedUsers, enemies, entitySize);
+
+    world.update(connectedUsers, false);
+
+    // const end = performance.now();
+    // console.log(end - start);
 };
 
 setInterval(update, updateRate * 1000);

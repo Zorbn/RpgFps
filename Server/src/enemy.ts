@@ -9,7 +9,6 @@ const wanderDelay = 1;
 // Collision checks are localised to entities within the same chunk.
 // Or maybe each chunk has enemies that don't leave like rooms in TBOI.
 export class Enemy {
-    public readonly id: number;
     private x: number;
     private y: number;
     private z: number;
@@ -21,8 +20,7 @@ export class Enemy {
     private wanderRange: number;
     private wanderTimer: number;
 
-    constructor(id: number, x: number, y: number, z: number, speed: number, wanderRange: number) {
-        this.id = id;
+    constructor(x: number, y: number, z: number, speed: number, wanderRange: number) {
         this.x = x;
         this.y = y;
         this.z = z;
