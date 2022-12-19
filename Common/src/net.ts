@@ -8,4 +8,5 @@ export enum MessageType {
     MoveEnemy,
     DestroyEnemy,
     SpawnProjectile,
+    DestroyProjectile,
 };

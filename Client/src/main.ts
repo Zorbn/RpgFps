@@ -122,11 +122,19 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             break;
 
         case MessageType.DestroyEnemy:
-            data.enemies.delete(msg.data.id);
+            for (let id of msg.data.enemyIds) {
+                data.enemies.delete(id);
+            }
             break;
 
         case MessageType.SpawnProjectile:
             data.projectiles.set(msg.data.id, new Projectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX, msg.data.dirY, msg.data.dirZ, msg.data.type));
+            break;
+
+        case MessageType.DestroyProjectile:
+            for (let id of msg.data.projectileIds) {
+                data.projectiles.delete(id);
+            }
             break;
     }
 };

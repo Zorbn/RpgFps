@@ -5,9 +5,6 @@ import { User } from "./user";
 
 const wanderDelay = 1;
 
-// TODO: The chunk position of each enemy is stored.
-// Collision checks are localised to entities within the same chunk.
-// Or maybe each chunk has enemies that don't leave like rooms in TBOI.
 export class Enemy {
     private x: number;
     private y: number;
@@ -33,8 +30,13 @@ export class Enemy {
         this.targetPlayerId = 0;
     }
 
-    getWanderPos = () => {
-        return (Math.random() * 2 - 1) * this.wanderRange;
+    getWanderPos = (current: number, min: number, max: number) => {
+        const newPos = current + (Math.random() * 2 - 1) * this.wanderRange;
+
+        if (newPos < min) return min;
+        if (newPos >= max) return max;
+
+        return newPos;
     }
 
     attack = (projectiles: Projectiles, users: Map<number, User>) => {
@@ -58,7 +60,7 @@ export class Enemy {
             dirX, dirY, dirZ, ProjectileTypes.Laser, users);
     }
 
-    update = (projectiles: Projectiles, users: Map<number, User>, deltaTime: number) => {
+    update = (projectiles: Projectiles, users: Map<number, User>, mapSize: number, deltaTime: number) => {
         let dirX = this.targetX - this.x;
         let dirY = this.targetY - this.y;
         let dirZ = this.targetZ - this.z;
@@ -81,8 +83,8 @@ export class Enemy {
         if (this.wanderTimer <= 0) {
             this.wanderTimer = wanderDelay;
 
-            this.targetX = this.x + this.getWanderPos();
-            this.targetZ = this.z + this.getWanderPos();
+            this.targetX = this.getWanderPos(this.x, 0, mapSize);
+            this.targetZ = this.getWanderPos(this.z, 0, mapSize);
 
             let nearestDistance = Infinity;
 

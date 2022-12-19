@@ -137,8 +137,6 @@ wss.on("connection", (ws) => {
                 break;
 
             case MessageType.SpawnProjectile:
-                if (msg.data.dirX == 0 && msg.data.dirY == 0 && msg.data.dirZ == 0) return;
-
                 projectiles.spawnProjectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX,
                     msg.data.dirY, msg.data.dirZ, msg.data.type, connectedUsers);
                 break;
@@ -162,7 +160,7 @@ const update = () => {
     world.clearStored();
 
     for (let [id, enemy] of enemies) {
-        enemy.update(projectiles, connectedUsers, updateRate);
+        enemy.update(projectiles, connectedUsers, world.mapSize, updateRate);
         world.tryStore(id, enemy.getX(), enemy.getY(), enemy.getZ(), EntityTypes.Enemy);
     }
 

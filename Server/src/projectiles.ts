@@ -17,6 +17,8 @@ export class Projectiles {
     }
 
     spawnProjectile = (x: number, y: number, z: number, dirX: number, dirY: number, dirZ: number, type: ProjectileTypes, users: Map<number, User>) => {
+        if (dirX == 0 && dirY == 0 && dirZ == 0) return;
+
         const newProjectileId = this.nextProjectileId++;
         const newProjectile = new Projectile(x, y, z, dirX, dirY, dirZ, type);
         this.data.set(newProjectileId, newProjectile);
@@ -39,7 +41,10 @@ export class Projectiles {
 
     // TODO: Also check collisions with players
     checkCollisions = (world: World, users: Map<number, User>, enemies: Map<number, Enemy>, entitySize: number) => {
-        for (let [_projectileId, projectile] of this.data) {
+        let projectileIds = [];
+        let enemyIds = [];
+
+        for (let [projectileId, projectile] of this.data) {
             if (projectile.type == ProjectileTypes.Laser) continue;
 
             const chunkX = Math.floor(projectile.getX() / world.chunkSize);
@@ -48,6 +53,8 @@ export class Projectiles {
 
             const chunk = world.getChunk(chunkX, chunkY, chunkZ);
             if (chunk == undefined) return;
+
+            let hit = false;
 
             for (let enemyId of chunk.storedEnemyIds) {
                 const enemy = enemies.get(enemyId);
@@ -58,16 +65,27 @@ export class Projectiles {
                     Math.abs(enemy.getZ() - projectile.getZ()) < entitySize) {
 
                     enemies.delete(enemyId);
+                    enemyIds.push(enemyId);
 
-                    const destroyEnemyData = {
-                        id: enemyId,
-                    };
+                    this.data.delete(projectileId);
+                    projectileIds.push(projectileId);
 
-                    for (let [_id, user] of users) {
-                        sendMsg(user.socket, MessageType.DestroyEnemy, destroyEnemyData);
-                    }
+                    hit = true;
+                    break;
                 }
             }
+
+            if (hit) break;
+        }
+
+        for (let [_id, user] of users) {
+            sendMsg(user.socket, MessageType.DestroyEnemy, {
+                enemyIds,
+            });
+
+            sendMsg(user.socket, MessageType.DestroyProjectile, {
+                projectileIds,
+            });
         }
     }
 
