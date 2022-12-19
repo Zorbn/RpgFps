@@ -7,6 +7,8 @@ import { Enemy } from "./enemy";
 import { Projectile } from "./projectile";
 import { Projectiles } from "./projectiles";
 
+// TODO: Spawn existing projectiles for new players.
+
 const port = 8080;
 const wss = new WebSocketServer({ port });
 const updateRate = 0.05;
@@ -122,13 +124,20 @@ wss.on("connection", (ws) => {
     });
 
     const handleMessage = (msg: any) => {
-        if (msg.type == MessageType.MovePlayer) {
-            if (!connectedUsers.has(msg.data.id)) return;
+        switch (msg.type) {
+            case MessageType.MovePlayer:
+                if (!connectedUsers.has(msg.data.id)) return;
 
-            let user = connectedUsers.get(msg.data.id)!;
-            user.player.x = msg.data.x;
-            user.player.y = msg.data.y;
-            user.player.z = msg.data.z;
+                let user = connectedUsers.get(msg.data.id)!;
+                user.player.x = msg.data.x;
+                user.player.y = msg.data.y;
+                user.player.z = msg.data.z;
+                break;
+
+            case MessageType.SpawnProjectile:
+                projectiles.spawnProjectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX,
+                    msg.data.dirY, msg.data.dirZ, msg.data.type, connectedUsers);
+                break;
         }
     };
 

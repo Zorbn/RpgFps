@@ -1,4 +1,5 @@
 import { distance } from "../../Common/src/gameMath";
+import { ProjectileTypes, projectileAttributes } from "../../Common/src/projectiles";
 
 export class Projectile {
     private x: number;
@@ -16,7 +17,7 @@ export class Projectile {
     private speed: number;
     private range: number;
 
-    constructor(x: number, y: number, z: number, dirX: number, dirY: number, dirZ: number, speed: number, range: number) {
+    constructor(x: number, y: number, z: number, dirX: number, dirY: number, dirZ: number, type: ProjectileTypes) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -29,8 +30,8 @@ export class Projectile {
         this.dirY = dirY;
         this.dirZ = dirZ;
 
-        this.speed = speed;
-        this.range = range;
+        this.speed = projectileAttributes.get(type)!.speed;
+        this.range = projectileAttributes.get(type)!.range;
     }
 
     update = (deltaTime: number) => {

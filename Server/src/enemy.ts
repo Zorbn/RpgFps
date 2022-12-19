@@ -1,9 +1,13 @@
 import { distance } from "../../Common/src/gameMath";
+import { ProjectileTypes } from "../../Common/src/projectiles";
 import { Projectiles } from "./projectiles";
 import { User } from "./user";
 
 const wanderDelay = 1;
 
+// TODO: The chunk position of each enemy is stored.
+// Collision checks are localised to entities within the same chunk.
+// Or maybe each chunk has enemies that don't leave like rooms in TBOI.
 export class Enemy {
     public readonly id: number;
     private x: number;
@@ -53,7 +57,7 @@ export class Enemy {
         }
 
         projectiles.spawnProjectile(this.x, this.y, this.z,
-            dirX, dirY, dirZ, 6.0, 4.0, users);
+            dirX, dirY, dirZ, ProjectileTypes.Laser, users);
     }
 
     update = (projectiles: Projectiles, users: Map<number, User>, deltaTime: number) => {

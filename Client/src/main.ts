@@ -7,6 +7,7 @@ import { Player } from "./player";
 import { loadTexArray } from "./resources";
 import { World } from "./world";
 import { MessageType } from "../../Common/src/net";
+import { sendMsg } from "./net";
 import { Projectile } from './projectile';
 
 const mainMenuElement = document.getElementById("main-menu")!;
@@ -15,13 +16,6 @@ const ipInput = document.getElementById("ip")! as HTMLInputElement;
 const port = 8080;
 const mouseSensitivity = 0.002;
 const maxEntities = 512;
-
-const sendMsg = (socket: WebSocket, type: MessageType, data: object) => {
-    socket.send(JSON.stringify({
-        type,
-        data,
-    }));
-};
 
 type DrawData = {
     scene: Three.Scene,
@@ -126,7 +120,7 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             break;
 
         case MessageType.SpawnProjectile:
-            data.projectiles.set(msg.data.id, new Projectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX, msg.data.dirY, msg.data.dirZ, msg.data.speed, msg.data.range));
+            data.projectiles.set(msg.data.id, new Projectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX, msg.data.dirY, msg.data.dirZ, msg.data.type));
             break;
     }
 };
@@ -149,7 +143,7 @@ const update = (data: Data) => {
     }
 
     for (let [_id, player] of data.players) {
-        player.update(deltaTime);
+        player.update(data.input, data.socket, deltaTime);
     }
 
     for (let [_id, enemy] of data.enemies) {
@@ -168,6 +162,8 @@ const update = (data: Data) => {
         data.drawData.camera.position.z,
         data.enemies, data.players, data.projectiles,
     );
+
+    data.input.update();
 
     draw(data.drawData);
 };

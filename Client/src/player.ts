@@ -1,9 +1,13 @@
 import * as Three from "three";
+import { MessageType } from "../../Common/src/net";
+import { ProjectileTypes } from "../../Common/src/projectiles";
 import { EntityModel } from "./entityModel";
+import { Input } from "./input";
+import { sendMsg } from "./net";
 
 const playerSpeed = 3;
 const maxLookAngle = Math.PI * 0.5 * 0.99;
-const eyeOffset = 0.1875;
+const eyeOffset = 0.1;
 
 export class Player {
     public readonly model: EntityModel;
@@ -44,7 +48,19 @@ export class Player {
         camera.getWorldDirection(this.lookDir);
     };
 
-    update = (deltaTime: number) => {
+    update = (input: Input, socket: WebSocket, deltaTime: number) => {
+        if (input.wasMouseButtonPressed(0)) {
+            sendMsg(socket, MessageType.SpawnProjectile, {
+                x: this.x,
+                y: this.y,
+                z: this.z,
+                dirX: this.lookDir.x,
+                dirY: this.lookDir.y,
+                dirZ: this.lookDir.z,
+                type: ProjectileTypes.Arrow,
+            })
+        }
+
         this.model.interpolate(this.x, this.y, this.z, deltaTime);
     }
 
