@@ -4,6 +4,8 @@ import { MessageType } from "../../Common/src/net";
 import { World } from "./world";
 import { User } from "./user";
 import { Enemy } from "./enemy";
+import { Projectile } from "./projectile";
+import { Projectiles } from "./projectiles";
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
@@ -16,6 +18,7 @@ let world = new World(32, 8, 2, 1);
 world.generate();
 let nextEnemyId = 0;
 let enemies: Enemy[] = [];
+let projectiles = new Projectiles();
 
 const spawnEnemy = () => {
     let spawnX = Math.floor(Math.random() * world.mapSizeInChunks);
@@ -36,7 +39,6 @@ const spawnEnemy = () => {
             x: newEnemy.getX(),
             y: newEnemy.getY(),
             z: newEnemy.getZ(),
-            size: entitySize,
         });
     }
 };
@@ -71,7 +73,6 @@ wss.on("connection", (ws) => {
             x: user.player.x,
             y: user.player.y,
             z: user.player.z,
-            size: entitySize,
         });
     }
 
@@ -87,20 +88,20 @@ wss.on("connection", (ws) => {
             x: enemy.getX(),
             y: enemy.getY(),
             z: enemy.getZ(),
-            size: entitySize,
         });
     }
 
     // Tell old players about the new player.
+    const newPlayerData = {
+        id,
+        x: player.x,
+        y: player.y,
+        z: player.z,
+    };
+
     for (let [otherId, user] of connectedUsers) {
         if (id == otherId) continue;
-        sendMsg(user.socket, MessageType.SpawnPlayer, {
-            id,
-            x: player.x,
-            y: player.y,
-            z: player.z,
-            size: entitySize,
-        });
+        sendMsg(user.socket, MessageType.SpawnPlayer, newPlayerData);
     }
 
     sendMsg(ws, MessageType.InitClient, {
@@ -111,10 +112,12 @@ wss.on("connection", (ws) => {
         connectedUsers.delete(id);
 
         // Tell other players to destroy this one.
+        const data = {
+            id,
+        };
+
         for (let [_otherId, user] of connectedUsers) {
-            sendMsg(user.socket, MessageType.DestroyPlayer, {
-                id,
-            });
+            sendMsg(user.socket, MessageType.DestroyPlayer, data);
         }
     });
 
@@ -142,7 +145,7 @@ wss.on("connection", (ws) => {
 
 const update = () => {
     for (let enemy of enemies) {
-        enemy.update(updateRate);
+        enemy.update(projectiles, connectedUsers, updateRate);
     }
 
     for (let [id, user] of connectedUsers) {

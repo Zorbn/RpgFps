@@ -7,13 +7,14 @@ import { Player } from "./player";
 import { loadTexArray } from "./resources";
 import { World } from "./world";
 import { MessageType } from "../../Common/src/net";
+import { Projectile } from './projectile';
 
 const mainMenuElement = document.getElementById("main-menu")!;
 const playButton = document.getElementById("play")!;
 const ipInput = document.getElementById("ip")! as HTMLInputElement;
 const port = 8080;
 const mouseSensitivity = 0.002;
-const maxEntities = 64;
+const maxEntities = 512;
 
 const sendMsg = (socket: WebSocket, type: MessageType, data: object) => {
     socket.send(JSON.stringify({
@@ -33,6 +34,7 @@ type Data = {
     drawData: DrawData,
     players: Map<number, Player>,
     enemies: Map<number, Enemy>,
+    projectiles: Map<number, Projectile>,
     localId: number,
     input: Input,
     lastTime: number,
@@ -90,7 +92,7 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
 
     switch (msg.type) {
         case MessageType.SpawnPlayer:
-            data.players.set(msg.data.id, new Player(msg.data.x, msg.data.y, msg.data.z, msg.data.size));
+            data.players.set(msg.data.id, new Player(msg.data.x, msg.data.y, msg.data.z));
             break;
 
         case MessageType.MovePlayer:
@@ -114,13 +116,17 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             break;
 
         case MessageType.SpawnEnemy:
-            data.enemies.set(msg.data.id, new Enemy(msg.data.x, msg.data.y, msg.data.z, msg.data.size));
+            data.enemies.set(msg.data.id, new Enemy(msg.data.x, msg.data.y, msg.data.z));
             break;
 
         case MessageType.MoveEnemy:
             if (!data.enemies.has(msg.data.id)) return;
             let enemy = data.enemies.get(msg.data.id)!;
             enemy.setPos(msg.data.x, msg.data.y, msg.data.z);
+            break;
+
+        case MessageType.SpawnProjectile:
+            data.projectiles.set(msg.data.id, new Projectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX, msg.data.dirY, msg.data.dirZ, msg.data.speed, msg.data.range));
             break;
     }
 };
@@ -150,11 +156,17 @@ const update = (data: Data) => {
         enemy.update(deltaTime);
     }
 
+    for (let [id, projectile] of data.projectiles) {
+        if (!projectile.update(deltaTime)) {
+            data.projectiles.delete(id);
+        }
+    }
+
     data.world.update();
     data.drawData.entityRenderer.update(
         data.drawData.camera.position.x,
         data.drawData.camera.position.z,
-        data.enemies, data.players,
+        data.enemies, data.players, data.projectiles,
     );
 
     draw(data.drawData);
@@ -180,6 +192,7 @@ const start = async (ws: WebSocket) => {
         },
         players: new Map<number, Player>(),
         enemies: new Map<number, Enemy>(),
+        projectiles: new Map<number, Projectile>(),
         localId: -1,
         input,
         lastTime: 0,
@@ -217,11 +230,15 @@ const start = async (ws: WebSocket) => {
     window.requestAnimationFrame(() => { update(data) });
 };
 
+let ws: WebSocket;
+
 playButton.onclick = () => {
     if (ipInput.value.length == 0) return;
 
-    const ws = new WebSocket("ws://" + ipInput.value + ":" + port);
-    ws.onopen = async () => {
-        await start(ws);
+    if (ws != undefined) ws.close();
+    ws = new WebSocket("ws://" + ipInput.value + ":" + port);
+
+    ws.onopen = () => {
+        start(ws);
     };
 };

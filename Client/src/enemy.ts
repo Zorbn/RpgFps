@@ -1,17 +1,15 @@
 import { EntityModel } from "./entityModel";
 
 export class Enemy {
-    public readonly size: number;
     public readonly model: EntityModel;
     private x: number;
     private y: number;
     private z: number;
 
-    constructor(x: number, y: number, z: number, size: number) {
+    constructor(x: number, y: number, z: number) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.size = size;
         this.model = new EntityModel(x, y, z, 1);
     }
 

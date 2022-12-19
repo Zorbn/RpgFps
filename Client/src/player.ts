@@ -3,25 +3,22 @@ import { EntityModel } from "./entityModel";
 
 const playerSpeed = 3;
 const maxLookAngle = Math.PI * 0.5 * 0.99;
+const eyeOffset = 0.1875;
 
 export class Player {
-    public readonly size: number;
     public readonly model: EntityModel;
     private x: number;
     private y: number;
     private z: number;
-    private eyeOffset: number;
     private angle: Three.Euler;
     private forwardDir: Three.Vector2;
     private rightDir: Three.Vector2;
     private lookDir: Three.Vector3;
 
-    constructor(x: number, y: number, z: number, size: number) {
+    constructor(x: number, y: number, z: number) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.size = size;
-        this.eyeOffset = size * 0.25;
         this.model = new EntityModel(x, y, z, 0);
 
         this.angle = new Three.Euler(0, 0, 0, "YXZ");
@@ -60,7 +57,7 @@ export class Player {
 
     moveCamera = (camera: Three.Camera) => {
         camera.position.x = this.x;
-        camera.position.y = this.y + this.eyeOffset;
+        camera.position.y = this.y + eyeOffset;
         camera.position.z = this.z;
     }
 

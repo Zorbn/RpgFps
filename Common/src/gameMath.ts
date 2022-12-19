@@ -9,3 +9,11 @@ export const indexTo3D = (i: number, size: number) => {
         z: Math.floor(i / (size * size)),
     }
 }
+
+export const distance = (x0: number, y0: number, z0: number, x1: number, y1: number, z1: number) => {
+    const distX = x0 - x1;
+    const distY = y0 - y1;
+    const distZ = z0 - z1;
+
+    return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
+}

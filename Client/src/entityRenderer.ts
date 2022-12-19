@@ -2,6 +2,7 @@ import * as Three from "three";
 import { Enemy } from "./enemy";
 import { EntityModel } from "./entityModel";
 import { Player } from "./player";
+import { Projectile } from "./projectile";
 
 const entityVs = `
 in int sprite;
@@ -90,6 +91,7 @@ export class EntityRenderer {
 
     addModel = (model: EntityModel, instanceIndex: number, camX: number, camZ: number) => {
         if (this.mesh == undefined) return false;
+        if (instanceIndex >= this.maxEntities) return false;
         if (!model.visible) return false;
 
         this.sprites[instanceIndex] = model.sprite;
@@ -98,7 +100,7 @@ export class EntityRenderer {
         return true;
     }
 
-    update = (camX: number, camZ: number, enemies: Map<number, Enemy>, players: Map<number, Player>) => {
+    update = (camX: number, camZ: number, enemies: Map<number, Enemy>, players: Map<number, Player>, projectiles: Map<number, Projectile>) => {
         if (this.mesh == undefined) return;
 
         let instanceCount = 0;
@@ -109,11 +111,19 @@ export class EntityRenderer {
             }
         }
 
+        for (let [_id, projectile] of projectiles) {
+            if (this.addModel(projectile.model, instanceCount, camX, camZ)) {
+                instanceCount++;
+            }
+        }
+
         for (let [_id, player] of players) {
             if (this.addModel(player.model, instanceCount, camX, camZ)) {
                 instanceCount++;
             }
         }
+
+        this.mesh.geometry.setAttribute("sprite", new Three.InstancedBufferAttribute(this.sprites, 1));
 
         this.mesh.instanceMatrix.needsUpdate = true;
         this.mesh.count = instanceCount;
