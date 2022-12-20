@@ -127,6 +127,12 @@ const handleMessage = (data: Data, event: MessageEvent<any>) => {
             }
             break;
 
+        case MessageType.DamageEnemy:
+            for (let id of msg.data.damagedEnemyIds) {
+                data.enemies.get(id)?.model.startBlink();
+            }
+            break;
+
         case MessageType.SpawnProjectile:
             data.projectiles.set(msg.data.id, new Projectile(msg.data.x, msg.data.y, msg.data.z, msg.data.dirX, msg.data.dirY, msg.data.dirZ, msg.data.type));
             break;

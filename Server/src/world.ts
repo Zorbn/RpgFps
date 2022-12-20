@@ -144,26 +144,36 @@ export class World {
         }
     }
 
-    tryStore = (id: number, x: number, y: number, z: number, type: EntityTypes) => {
-        const chunkX = Math.floor(x / this.chunkSize);
-        const chunkY = Math.floor(y / this.chunkHeight);
-        const chunkZ = Math.floor(z / this.chunkSize);
+    tryStore = (id: number, x: number, y: number, z: number, size: number, type: EntityTypes) => {
+        for (let i = 0; i < 8; i++) {
+            const xOff = i % 2 * 2 - 1;
+            const yOff = Math.floor(i / 4) * 2 - 1;
+            const zOff = Math.floor(i / 2) % 2 * 2 - 1;
 
-        const chunk = this.getChunk(chunkX, chunkY, chunkZ);
-        if (chunk == undefined) return;
+            const cornerX = x + size * 0.5 * xOff;
+            const cornerY = y + size * 0.5 * yOff;
+            const cornerZ = z + size * 0.5 * zOff;
 
-        switch (type) {
-            case EntityTypes.Player:
-                chunk.storedPlayerIds.add(id);
-                break;
+            const chunkX = Math.floor(cornerX / this.chunkSize);
+            const chunkY = Math.floor(cornerY / this.chunkHeight);
+            const chunkZ = Math.floor(cornerZ / this.chunkSize);
 
-            case EntityTypes.Enemy:
-                chunk.storedEnemyIds.add(id);
-                break;
+            const chunk = this.getChunk(chunkX, chunkY, chunkZ);
+            if (chunk == undefined) return;
 
-            case EntityTypes.Projectile:
-                chunk.storedProjectileIds.add(id);
-                break;
+            switch (type) {
+                case EntityTypes.Player:
+                    chunk.storedPlayerIds.add(id);
+                    break;
+
+                case EntityTypes.Enemy:
+                    chunk.storedEnemyIds.add(id);
+                    break;
+
+                case EntityTypes.Projectile:
+                    chunk.storedProjectileIds.add(id);
+                    break;
+            }
         }
     }
 

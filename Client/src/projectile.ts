@@ -33,9 +33,10 @@ export class Projectile {
         this.dirY = dirY;
         this.dirZ = dirZ;
 
-        this.speed = projectileAttributes.get(type)!.speed;
-        this.range = projectileAttributes.get(type)!.range;
-        this.model = new EntityModel(x, y, z, projectileAttributes.get(type)!.spriteIndex);
+        const attributes = projectileAttributes.get(type)!;
+        this.speed = attributes.speed;
+        this.range = attributes.range;
+        this.model = new EntityModel(x, y, z, attributes.spriteIndex);
     }
 
     update = (deltaTime: number) => {

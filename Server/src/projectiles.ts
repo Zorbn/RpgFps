@@ -39,48 +39,67 @@ export class Projectiles {
         }
     }
 
-    // TODO: Also check collisions with players
     checkCollisions = (world: World, users: Map<number, User>, enemies: Map<number, Enemy>, entitySize: number) => {
         let projectileIds = [];
         let enemyIds = [];
+        let damagedEnemyIds = [];
 
         for (let [projectileId, projectile] of this.data) {
             if (projectile.type == ProjectileTypes.Laser) continue;
 
-            const chunkX = Math.floor(projectile.getX() / world.chunkSize);
-            const chunkY = Math.floor(projectile.getY() / world.chunkHeight);
-            const chunkZ = Math.floor(projectile.getZ() / world.chunkSize);
+            for (let i = 0; i < 8; i++) {
+                const xOff = i % 2 * 2 - 1;
+                const yOff = Math.floor(i / 4) * 2 - 1;
+                const zOff = Math.floor(i / 2) % 2 * 2 - 1;
 
-            const chunk = world.getChunk(chunkX, chunkY, chunkZ);
-            if (chunk == undefined) return;
+                const cornerX = projectile.getX() + entitySize * 0.5 * xOff;
+                const cornerY = projectile.getY() + entitySize * 0.5 * yOff;
+                const cornerZ = projectile.getZ() + entitySize * 0.5 * zOff;
 
-            let hit = false;
+                const chunkX = Math.floor(cornerX / world.chunkSize);
+                const chunkY = Math.floor(cornerY / world.chunkHeight);
+                const chunkZ = Math.floor(cornerZ / world.chunkSize);
 
-            for (let enemyId of chunk.storedEnemyIds) {
-                const enemy = enemies.get(enemyId);
-                if (enemy == undefined) continue;
+                const chunk = world.getChunk(chunkX, chunkY, chunkZ);
+                if (chunk == undefined) continue;
 
-                if (Math.abs(enemy.getX() - projectile.getX()) < entitySize &&
-                    Math.abs(enemy.getY() - projectile.getY()) < entitySize &&
-                    Math.abs(enemy.getZ() - projectile.getZ()) < entitySize) {
+                let hit = false;
 
-                    enemies.delete(enemyId);
-                    enemyIds.push(enemyId);
+                for (let enemyId of chunk.storedEnemyIds) {
+                    const enemy = enemies.get(enemyId);
+                    if (enemy == undefined) continue;
 
-                    this.data.delete(projectileId);
-                    projectileIds.push(projectileId);
+                    if (Math.abs(enemy.getX() - projectile.getX()) < entitySize &&
+                        Math.abs(enemy.getY() - projectile.getY()) < entitySize &&
+                        Math.abs(enemy.getZ() - projectile.getZ()) < entitySize) {
 
-                    hit = true;
-                    break;
+                        // Destroy enemy if taking damage killed it.
+                        if (enemy.takeDamage(projectile.damage)) {
+                            enemies.delete(enemyId);
+                            enemyIds.push(enemyId);
+                        } else {
+                            damagedEnemyIds.push(enemyId);
+                        }
+
+                        this.data.delete(projectileId);
+                        projectileIds.push(projectileId);
+
+                        hit = true;
+                        break;
+                    }
                 }
-            }
 
-            if (hit) break;
+                if (hit) break;
+            }
         }
 
         for (let [_id, user] of users) {
             sendMsg(user.socket, MessageType.DestroyEnemy, {
                 enemyIds,
+            });
+
+            sendMsg(user.socket, MessageType.DamageEnemy, {
+                damagedEnemyIds,
             });
 
             sendMsg(user.socket, MessageType.DestroyProjectile, {

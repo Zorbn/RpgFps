@@ -5,16 +5,22 @@ import { Player } from "./player";
 import { Projectile } from "./projectile";
 
 const entityVs = `
+precision highp float;
+precision highp int;
+
 in int sprite;
+in float blink;
 
 out vec2 vertUv;
 flat out int instId;
 flat out int instSprite;
+out float instBlink;
 
 void main() {
     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
     instId = gl_InstanceID;
     instSprite = sprite;
+    instBlink = blink;
     vertUv = uv;
 }
 `;
@@ -28,11 +34,13 @@ uniform sampler2DArray diffuse;
 in vec2 vertUv;
 flat in int instId;
 flat in int instSprite;
+in float instBlink;
 
 out vec4 outColor;
 
 void main() {
-    outColor = texture(diffuse, vec3(vertUv.x, 1.0 - vertUv.y, instSprite));
+    vec4 color = texture(diffuse, vec3(vertUv.x, 1.0 - vertUv.y, instSprite));
+    outColor = mix(color, vec4(1.0, 0.0, 0.0, color.a), instBlink);
 
     if (outColor.a < 0.1) {
         discard;
@@ -43,10 +51,12 @@ void main() {
 export class EntityRenderer {
     private mesh?: Three.InstancedMesh;
     private sprites: Int32Array;
+    private blinks: Float32Array;
     private maxEntities: number;
 
     constructor(maxEntities: number) {
         this.sprites = new Int32Array(maxEntities);
+        this.blinks = new Float32Array(maxEntities);
         this.maxEntities = maxEntities;
 
     }
@@ -66,7 +76,7 @@ export class EntityRenderer {
             material,
             this.maxEntities,
         );
-        this.mesh.geometry.setAttribute("sprite", new Three.InstancedBufferAttribute(this.sprites, 1));
+
         this.mesh.instanceMatrix.setUsage(Three.DynamicDrawUsage);
 
         scene.add(this.mesh);
@@ -95,6 +105,7 @@ export class EntityRenderer {
         if (!model.visible) return false;
 
         this.sprites[instanceIndex] = model.sprite;
+        this.blinks[instanceIndex] = model.getBlink();
         this.mesh.setMatrixAt(instanceIndex, this.createMatrix(camX, camZ, model.getX(), model.getY(), model.getZ()));
 
         return true;
@@ -124,6 +135,7 @@ export class EntityRenderer {
         }
 
         this.mesh.geometry.setAttribute("sprite", new Three.InstancedBufferAttribute(this.sprites, 1));
+        this.mesh.geometry.setAttribute("blink", new Three.InstancedBufferAttribute(this.blinks, 1));
 
         this.mesh.instanceMatrix.needsUpdate = true;
         this.mesh.count = instanceCount;

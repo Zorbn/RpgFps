@@ -17,3 +17,7 @@ export const distance = (x0: number, y0: number, z0: number, x1: number, y1: num
 
     return Math.sqrt(distX * distX + distY * distY + distZ * distZ);
 }
+
+export const clamp = (value: number, min: number, max: number) => {
+    return Math.max(min, Math.min(value, max));
+}

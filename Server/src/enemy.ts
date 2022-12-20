@@ -1,4 +1,4 @@
-import { distance } from "../../Common/src/gameMath";
+import { clamp, distance } from "../../Common/src/gameMath";
 import { ProjectileTypes } from "../../Common/src/projectiles";
 import { Projectiles } from "./projectiles";
 import { User } from "./user";
@@ -13,11 +13,12 @@ export class Enemy {
     private targetY: number;
     private targetZ: number;
     private targetPlayerId: number;
+    private health: number;
     private speed: number;
     private wanderRange: number;
     private wanderTimer: number;
 
-    constructor(x: number, y: number, z: number, speed: number, wanderRange: number) {
+    constructor(x: number, y: number, z: number, speed: number, health: number, wanderRange: number) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -25,6 +26,7 @@ export class Enemy {
         this.targetY = y;
         this.targetZ = z;
         this.speed = speed;
+        this.health = health;
         this.wanderRange = wanderRange;
         this.wanderTimer = 0;
         this.targetPlayerId = 0;
@@ -61,30 +63,13 @@ export class Enemy {
     }
 
     update = (projectiles: Projectiles, users: Map<number, User>, mapSize: number, deltaTime: number) => {
-        let dirX = this.targetX - this.x;
-        let dirY = this.targetY - this.y;
-        let dirZ = this.targetZ - this.z;
-
-        const dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-
-        if (dist != 0) {
-            dirX /= dist;
-            dirY /= dist;
-            dirZ /= dist;
-        }
-
-        const currentSpeed = this.speed * deltaTime;
-        this.x += dirX * currentSpeed;
-        this.y += dirY * currentSpeed;
-        this.z += dirZ * currentSpeed;
-
         this.wanderTimer -= deltaTime;
 
         if (this.wanderTimer <= 0) {
             this.wanderTimer = wanderDelay;
 
-            this.targetX = this.getWanderPos(this.x, 0, mapSize);
-            this.targetZ = this.getWanderPos(this.z, 0, mapSize);
+            this.targetX = this.getWanderPos(this.x, 1, mapSize - 1);
+            this.targetZ = this.getWanderPos(this.z, 1, mapSize - 1);
 
             let nearestDistance = Infinity;
 
@@ -99,6 +84,29 @@ export class Enemy {
 
             this.attack(projectiles, users);
         }
+
+        let dirX = this.targetX - this.x;
+        let dirY = this.targetY - this.y;
+        let dirZ = this.targetZ - this.z;
+
+        const dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+
+        if (dist != 0) {
+            dirX /= dist;
+            dirY /= dist;
+            dirZ /= dist;
+        }
+
+        const currentSpeed = this.speed * deltaTime;
+        this.x = clamp(this.x + dirX * currentSpeed, 0, mapSize);
+        this.y = clamp(this.y + dirY * currentSpeed, 0, mapSize);
+        this.z = clamp(this.z + dirZ * currentSpeed, 0, mapSize);
+    }
+
+    takeDamage = (amount: number) => {
+        this.health -= amount;
+
+        return this.health <= 0;
     }
 
     getX = () => {

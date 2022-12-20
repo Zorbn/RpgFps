@@ -5,7 +5,7 @@ import { EntityModel } from "./entityModel";
 import { Input } from "./input";
 import { sendMsg } from "./net";
 
-const playerSpeed = 3;
+const playerSpeed = 2;
 const maxLookAngle = Math.PI * 0.5 * 0.99;
 const eyeOffset = 0.1;
 

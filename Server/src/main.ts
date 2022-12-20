@@ -9,6 +9,7 @@ import { Projectiles } from "./projectiles";
 import { EntityTypes } from "../../Common/src/entityTypes";
 
 // TODO: Spawn existing projectiles for new players.
+// TODO: Also check projectile collisions with players.
 
 const port = 8080;
 const wss = new WebSocketServer({ port });
@@ -33,7 +34,7 @@ const spawnEnemy = () => {
     if (!spawnPos.succeeded) return;
 
     const newEnemyId = nextEnemyId++;
-    const newEnemy = new Enemy(spawnPos.x, spawnPos.y, spawnPos.z, 1, 5);
+    const newEnemy = new Enemy(spawnPos.x, spawnPos.y, spawnPos.z, 1, 100, 5);
     enemies.set(newEnemyId, newEnemy);
 
     // Tell players about the new enemy.
@@ -161,11 +162,11 @@ const update = () => {
 
     for (let [id, enemy] of enemies) {
         enemy.update(projectiles, connectedUsers, world.mapSize, updateRate);
-        world.tryStore(id, enemy.getX(), enemy.getY(), enemy.getZ(), EntityTypes.Enemy);
+        world.tryStore(id, enemy.getX(), enemy.getY(), enemy.getZ(), entitySize, EntityTypes.Enemy);
     }
 
     for (let [id, user] of connectedUsers) {
-        world.tryStore(id, user.player.x, user.player.y, user.player.z, EntityTypes.Player);
+        world.tryStore(id, user.player.x, user.player.y, user.player.z, entitySize, EntityTypes.Player);
 
         const userMoveData = {
             id: id,
