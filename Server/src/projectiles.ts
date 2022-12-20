@@ -6,6 +6,7 @@ import { ProjectileTypes } from "../../Common/src/projectiles";
 import { World } from "./world";
 import { EntityTypes } from "../../Common/src/entityTypes";
 import { Enemy } from "./enemy";
+import { getCornerX, getCornerY, getCornerZ } from "../../Common/src/gameMath";
 
 export class Projectiles {
     private data: Map<number, Projectile>;
@@ -39,7 +40,7 @@ export class Projectiles {
         }
     }
 
-    checkCollisions = (world: World, users: Map<number, User>, enemies: Map<number, Enemy>, entitySize: number) => {
+    checkCollisions = (world: World, users: Map<number, User>, enemies: Map<number, Enemy>, size: number) => {
         let projectileIds = [];
         let enemyIds = [];
         let damagedEnemyIds = [];
@@ -48,13 +49,9 @@ export class Projectiles {
             if (projectile.type == ProjectileTypes.Laser) continue;
 
             for (let i = 0; i < 8; i++) {
-                const xOff = i % 2 * 2 - 1;
-                const yOff = Math.floor(i / 4) * 2 - 1;
-                const zOff = Math.floor(i / 2) % 2 * 2 - 1;
-
-                const cornerX = projectile.getX() + entitySize * 0.5 * xOff;
-                const cornerY = projectile.getY() + entitySize * 0.5 * yOff;
-                const cornerZ = projectile.getZ() + entitySize * 0.5 * zOff;
+                const cornerX = projectile.getX() + size * 0.5 * getCornerX(i);
+                const cornerY = projectile.getY() + size * 0.5 * getCornerY(i);
+                const cornerZ = projectile.getZ() + size * 0.5 * getCornerZ(i);
 
                 const chunkX = Math.floor(cornerX / world.chunkSize);
                 const chunkY = Math.floor(cornerY / world.chunkHeight);
@@ -69,9 +66,9 @@ export class Projectiles {
                     const enemy = enemies.get(enemyId);
                     if (enemy == undefined) continue;
 
-                    if (Math.abs(enemy.getX() - projectile.getX()) < entitySize &&
-                        Math.abs(enemy.getY() - projectile.getY()) < entitySize &&
-                        Math.abs(enemy.getZ() - projectile.getZ()) < entitySize) {
+                    if (Math.abs(enemy.getX() - projectile.getX()) < size &&
+                        Math.abs(enemy.getY() - projectile.getY()) < size &&
+                        Math.abs(enemy.getZ() - projectile.getZ()) < size) {
 
                         // Destroy enemy if taking damage killed it.
                         if (enemy.takeDamage(projectile.damage)) {

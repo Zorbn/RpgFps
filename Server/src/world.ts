@@ -1,5 +1,5 @@
 import { Chunk } from "./chunk";
-import { hashVector } from "../../Common/src/gameMath";
+import { getCornerX, getCornerY, getCornerZ, hashVector } from "../../Common/src/gameMath";
 import { blockAttributes, Blocks } from "../../Common/src/blocks";
 import { User } from "./user";
 import { EntityTypes } from "../../Common/src/entityTypes";
@@ -146,13 +146,9 @@ export class World {
 
     tryStore = (id: number, x: number, y: number, z: number, size: number, type: EntityTypes) => {
         for (let i = 0; i < 8; i++) {
-            const xOff = i % 2 * 2 - 1;
-            const yOff = Math.floor(i / 4) * 2 - 1;
-            const zOff = Math.floor(i / 2) % 2 * 2 - 1;
-
-            const cornerX = x + size * 0.5 * xOff;
-            const cornerY = y + size * 0.5 * yOff;
-            const cornerZ = z + size * 0.5 * zOff;
+            const cornerX = x + size * 0.5 * getCornerX(i);
+            const cornerY = y + size * 0.5 * getCornerY(i);
+            const cornerZ = z + size * 0.5 * getCornerZ(i);
 
             const chunkX = Math.floor(cornerX / this.chunkSize);
             const chunkY = Math.floor(cornerY / this.chunkHeight);

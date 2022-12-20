@@ -36,13 +36,13 @@ export class Player {
         this.angle.y += deltaY;
         this.angle.x = Math.max(Math.min(this.angle.x, maxLookAngle), -maxLookAngle);
 
-        this.forwardDir.x = Math.sin(this.angle.y);
-        this.forwardDir.y = Math.cos(this.angle.y);
+        this.forwardDir.x = -Math.sin(this.angle.y);
+        this.forwardDir.y = -Math.cos(this.angle.y);
 
         const rightCameraAngle = this.angle.y + Math.PI / 2;
 
-        this.rightDir.x = Math.sin(rightCameraAngle);
-        this.rightDir.y = Math.cos(rightCameraAngle);
+        this.rightDir.x = -Math.sin(rightCameraAngle);
+        this.rightDir.y = -Math.cos(rightCameraAngle);
 
         camera.quaternion.setFromEuler(this.angle);
         camera.getWorldDirection(this.lookDir);
@@ -54,9 +54,9 @@ export class Player {
                 x: this.x,
                 y: this.y,
                 z: this.z,
-                dirX: this.lookDir.x,
-                dirY: this.lookDir.y,
-                dirZ: this.lookDir.z,
+                dirX: this.forwardDir.x,
+                dirY: 0,
+                dirZ: this.forwardDir.y,
                 type: ProjectileTypes.Arrow,
             })
         }
@@ -67,8 +67,8 @@ export class Player {
     move = (moveX: number, moveZ: number, deltaTime: number) => {
         const currentSpeed = playerSpeed * deltaTime;
 
-        this.x -= (moveZ * this.forwardDir.x + moveX * this.rightDir.x) * currentSpeed;
-        this.z -= (moveZ * this.forwardDir.y + moveX * this.rightDir.y) * currentSpeed;
+        this.x += (moveZ * this.forwardDir.x + moveX * this.rightDir.x) * currentSpeed;
+        this.z += (moveZ * this.forwardDir.y + moveX * this.rightDir.y) * currentSpeed;
     }
 
     moveCamera = (camera: Three.Camera) => {
