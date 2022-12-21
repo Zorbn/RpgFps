@@ -152,7 +152,7 @@ const update = (data: Data) => {
     const deltaTime = newTime - data.lastTime;
     data.lastTime = newTime
 
-    if (deltaTime > 0.01) return;
+    if (deltaTime > 0.1) return;
 
     while (data.messageEvents.length > 0) {
         handleMessage(data, data.messageEvents.pop()!);
