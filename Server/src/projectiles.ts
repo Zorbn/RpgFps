@@ -7,6 +7,7 @@ import { World } from "./world";
 import { EntityTypes } from "../../Common/src/entityTypes";
 import { Enemy } from "./enemy";
 import { getCornerX, getCornerY, getCornerZ } from "../../Common/src/gameMath";
+import { WebSocket } from "ws";
 
 export class Projectiles {
     private data: Map<number, Projectile>;
@@ -37,6 +38,21 @@ export class Projectiles {
 
         for (let [_id, user] of users) {
             sendMsg(user.socket, MessageType.SpawnProjectile, newProjectileData);
+        }
+    }
+    
+    spawnExistingProjectiles = (socket: WebSocket) => {
+        for (let [id, projectile] of this.data) {
+            sendMsg(socket, MessageType.SpawnProjectile, {
+                id,
+                x: projectile.getX(),
+                y: projectile.getY(),
+                z: projectile.getZ(),
+                dirX: projectile.dirX,
+                dirY: projectile.dirY,
+                dirZ: projectile.dirZ,
+                type: projectile.type,
+            });
         }
     }
 

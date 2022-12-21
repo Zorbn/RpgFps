@@ -5,6 +5,10 @@ export class Projectile {
     public readonly type: ProjectileTypes;
     public readonly damage: number;
 
+    public readonly dirX: number;
+    public readonly dirY: number;
+    public readonly dirZ: number;
+
     private x: number;
     private y: number;
     private z: number;
@@ -12,10 +16,6 @@ export class Projectile {
     private startX: number;
     private startY: number;
     private startZ: number;
-
-    private dirX: number;
-    private dirY: number;
-    private dirZ: number;
 
     private speed: number;
     private range: number;

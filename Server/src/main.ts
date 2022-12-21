@@ -4,11 +4,9 @@ import { MessageType } from "../../Common/src/net";
 import { World } from "./world";
 import { User } from "./user";
 import { Enemy } from "./enemy";
-import { Projectile } from "./projectile";
 import { Projectiles } from "./projectiles";
 import { EntityTypes } from "../../Common/src/entityTypes";
 
-// TODO: Spawn existing projectiles for new players.
 // TODO: Also check projectile collisions with players.
 
 const port = 8080;
@@ -95,6 +93,9 @@ wss.on("connection", (ws) => {
             z: enemy.getZ(),
         });
     }
+
+    // Tell new player about all projectiles on the map.
+    projectiles.spawnExistingProjectiles(ws);
 
     // Tell old players about the new player.
     const newPlayerData = {
