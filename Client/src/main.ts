@@ -6,7 +6,7 @@ import { Input } from "./input";
 import { Player } from "./player";
 import { loadTexArray } from "./resources";
 import { World } from "./world";
-import { MessageType } from "../../Common/src/net";
+import { MessageType } from "common";
 import { sendMsg } from "./net";
 import { Projectile } from './projectile';
 

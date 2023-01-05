@@ -1,11 +1,11 @@
 import { WebSocketServer } from "ws";
 import { sendMsg } from "./net";
-import { MessageType } from "../../Common/src/net";
+import { MessageType } from "common";
 import { World } from "./world";
 import { User } from "./user";
 import { Enemy } from "./enemy";
 import { Projectiles } from "./projectiles";
-import { EntityTypes } from "../../Common/src/entityTypes";
+import { EntityTypes } from "common";
 
 // TODO: Also check projectile collisions with players.
 

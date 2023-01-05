@@ -2,11 +2,13 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/three': ^0.146.0
+  common: file:../Common
   three: ^0.147.0
   typescript: ^4.9.3
   vite: ^4.0.0
 
 dependencies:
+  common: file:../Common
   three: 0.147.0
 
 devDependencies:
@@ -371,3 +373,9 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  file:../Common:
+    resolution: {directory: ../Common, type: directory}
+    name: common
+    version: 0.0.0
+    dev: false

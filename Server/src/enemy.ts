@@ -1,5 +1,5 @@
-import { clamp, distance } from "../../Common/src/gameMath";
-import { ProjectileTypes } from "../../Common/src/projectiles";
+import { clamp, distance } from "common";
+import { ProjectileTypes } from "common";
 import { Projectiles } from "./projectiles";
 import { User } from "./user";
 

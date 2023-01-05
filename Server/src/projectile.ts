@@ -1,5 +1,5 @@
-import { distance } from "../../Common/src/gameMath";
-import { ProjectileTypes, projectileAttributes } from "../../Common/src/projectiles";
+import { distance } from "common";
+import { ProjectileTypes, projectileAttributes } from "common";
 
 export class Projectile {
     public readonly type: ProjectileTypes;

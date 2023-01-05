@@ -1,12 +1,11 @@
-import { MessageType } from "../../Common/src/net";
+import { MessageType } from "common";
 import { sendMsg } from "./net";
 import { Projectile } from "./projectile";
 import { User } from "./user";
-import { ProjectileTypes } from "../../Common/src/projectiles";
+import { ProjectileTypes } from "common";
 import { World } from "./world";
-import { EntityTypes } from "../../Common/src/entityTypes";
 import { Enemy } from "./enemy";
-import { getCornerX, getCornerY, getCornerZ } from "../../Common/src/gameMath";
+import { getCornerX, getCornerY, getCornerZ } from "common";
 import { WebSocket } from "ws";
 
 export class Projectiles {
@@ -40,7 +39,7 @@ export class Projectiles {
             sendMsg(user.socket, MessageType.SpawnProjectile, newProjectileData);
         }
     }
-    
+
     spawnExistingProjectiles = (socket: WebSocket) => {
         for (let [id, projectile] of this.data) {
             sendMsg(socket, MessageType.SpawnProjectile, {

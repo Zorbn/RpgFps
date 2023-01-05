@@ -1,8 +1,8 @@
 import { Chunk } from "./chunk";
-import { getCornerX, getCornerY, getCornerZ, hashVector } from "../../Common/src/gameMath";
-import { blockAttributes, Blocks } from "../../Common/src/blocks";
+import { getCornerX, getCornerY, getCornerZ, hashVector } from "common";
+import { blockAttributes, Blocks } from "common";
 import { User } from "./user";
-import { EntityTypes } from "../../Common/src/entityTypes";
+import { EntityTypes } from "common";
 
 export class World {
     public readonly mapSizeInChunks: number;
